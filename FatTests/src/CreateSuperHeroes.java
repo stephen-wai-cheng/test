@@ -43,6 +43,10 @@ public class CreateSuperHeroes {
 		createSuperAssociation("Dr. Manhattan","Precognition");
 		createSuperAssociation("Dr. Manhattan","Mind control");
 		createSuperAssociation("The Flash","Super speed");
+		createSuperAssociation("Captain Marvel","Super strength");
+		createSuperAssociation("Captain Marvel","Super speed");
+		createSuperAssociation("Captain Marvel","Able to fly");
+		createSuperAssociation("Green Lantern","Able to fly");
 	}
 
 	private static void createSuperAssets() {
