@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.fatwire.assetapi.common.AssetAccessException;
 import com.fatwire.assetapi.data.AssetData;
+import com.fatwire.assetapi.data.AssetDataImpl;
 import com.fatwire.assetapi.data.AssetDataManager;
 import com.fatwire.assetapi.data.AssetId;
 import com.fatwire.assetapi.data.AttributeData;
@@ -84,29 +85,30 @@ public class CreateSuperHeroes {
 	}
 
 	private static void createSuperAssociation(String superHero, String superPower) {
-		AssetId parentAssetId = new AssetIdImpl( "SuperHero", getHeroId(superHero));
+		AssetId powerAssetId = new AssetIdImpl( "SuperPower", getPowerId(superPower));
 		
-		Query query = new SimpleQuery("SuperPower", null,
-				ConditionFactory.createCondition("name", OpTypeEnum.EQUALS, superPower),
-				Collections.singletonList("name"));		
+		Query query = new SimpleQuery("SuperHero", null,
+				ConditionFactory.createCondition("name", OpTypeEnum.EQUALS, superHero),
+				Arrays.asList( "name", "description", "Dimension", "Dimension-parent", "Publist" ));		
 		try {
 			if (assetDataManager.read(query).iterator().hasNext()){
-				AssetData assetData = assetDataManager.read(query).iterator().next();
-				assetData.getParents().add(parentAssetId);
-				List<AssetData> sAssets = new ArrayList<AssetData>();
-				sAssets.add(assetData);
-				assetDataManager.update( sAssets );
+				AssetDataImpl heroAsset = (AssetDataImpl) assetDataManager.read(query).iterator().next();
+				List<AssetId> associatedPowers = heroAsset.getAssociatedAssets("SuperPowers");
+				if (!associatedPowers.contains(powerAssetId)) {					
+					heroAsset.addAssociation("SuperPowers", Arrays.asList(powerAssetId));
+					assetDataManager.update( Arrays.asList((AssetData) heroAsset) );
+				}
 			}
 		} catch (AssetAccessException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-
-	private static Long getHeroId(String superHero) {
+	
+	private static Long getPowerId(String superPower) {
 		AssetId assetId = null;
-		Query query = new SimpleQuery("SuperHero", null,
-				ConditionFactory.createCondition("name", OpTypeEnum.EQUALS, superHero),
+		Query query = new SimpleQuery("SuperPower", null,
+				ConditionFactory.createCondition("name", OpTypeEnum.EQUALS, superPower),
 				Collections.singletonList("name"));
 		try {
 			if (assetDataManager.read(query).iterator().hasNext()){
