@@ -1,6 +1,7 @@
 package fatwireHelpers.asset;
 
 import java.util.Collections;
+import java.util.Map;
 import java.util.Properties;
 
 import com.fatwire.assetapi.common.AssetAccessException;
@@ -11,26 +12,38 @@ import com.fatwire.system.Session;
 import com.fatwire.system.SessionFactory;
 
 public class AssetDataManagerHelper {
-	public static AssetDataManager getManager() {
-		setFatwireProperties();
-		Session ses = SessionFactory.newSession("fwadmin", "xceladmin");
+	private static volatile AssetDataManagerHelper instance = null;
+	private static volatile Session ses = null;
+	
+    public static AssetDataManagerHelper getInstance(Map<String, String> configSettings) {
+        if (instance == null) {
+            synchronized (AssetDataManagerHelper.class) {
+                // Double check
+                if (instance == null) {
+                    instance = new AssetDataManagerHelper();
+					Properties props = System.getProperties();
+					props.setProperty("cs.dburl", configSettings.get("cs.dburl"));
+					props.setProperty("cs.dbdriver", configSettings.get("cs.dbdriver"));
+					props.setProperty("cs.dbuid", configSettings.get("cs.dbuid"));
+					props.setProperty("cs.dbpwd", configSettings.get("cs.dbpwd"));
+					props.setProperty("cs.installDir", configSettings.get("cs.installDir"));
+					ses = SessionFactory.newSession(
+							configSettings.get("cs.uid"),
+							configSettings.get("cs.pwd"));
+                }
+            }
+        }
+        return instance;
+    }
+	
+	public AssetDataManager getManager() {
 		AssetDataManager mgr = (AssetDataManager) ses.getManager(AssetDataManager.class.getName());
 		return mgr;
 	}
 	
-	public static AssetTypeDefManager getAssetTypeDefManager() {
-		setFatwireProperties();
-		Session ses = SessionFactory.newSession("fwadmin", "xceladmin");
+	public AssetTypeDefManager getAssetTypeDefManager() {
 		AssetTypeDefManager mgr = (AssetTypeDefManager) ses.getManager(AssetTypeDefManager.class.getName());
 		return mgr;
 	}
 
-	private static void setFatwireProperties() {
-		Properties props = System.getProperties();
-		props.setProperty("cs.dburl", "jdbc:jtds:sqlserver://localhost:1433;instanceName=SQLEXPRESS;DatabaseName=Fatwire;");
-		props.setProperty("cs.dbdriver", "net.sourceforge.jtds.jdbc.Driver");
-		props.setProperty("cs.dbuid", "Fatwire");
-		props.setProperty("cs.dbpwd", "Fatwire");
-		props.setProperty("cs.installDir", "C:\\fatwire");
-	}
 }

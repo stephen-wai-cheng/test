@@ -2,6 +2,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import com.fatwire.assetapi.common.AssetAccessException;
@@ -78,7 +79,16 @@ public class CreateSuperHeroes {
 				"Precognition",
 				"Mind control",
 				"Teleportation");
-		assetDataManager = AssetDataManagerHelper.getManager();
+		assetDataManager = AssetDataManagerHelper.getInstance(
+				new HashMap<String, String>() {{
+					   put("cs.uid", "fwadmin");
+					   put("cs.pwd", "xceladmin");
+					   put("cs.dburl", "jdbc:jtds:sqlserver://localhost:1433;instanceName=SQLEXPRESS;DatabaseName=Fatwire;");
+					   put("cs.dbdriver", "net.sourceforge.jtds.jdbc.Driver");
+					   put("cs.dbuid", "Fatwire");
+					   put("cs.dbpwd", "Fatwire");
+					   put("cs.installDir", "C:\\fatwire");			   
+					}}).getManager();
 		for (String hero : heroes){
 			CreateSuperHeroAsset("SuperHero", hero);
 		}

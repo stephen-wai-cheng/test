@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import org.junit.After;
@@ -35,9 +36,21 @@ import com.openmarket.xcelerate.asset.AssetIdImpl;
 import fatwireHelpers.asset.AssetDataManagerHelper;
 
 public class AssetDataManagerTests {
-
+	private static AssetDataManagerHelper admMgr;
+	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
+		admMgr = AssetDataManagerHelper.getInstance(
+			new HashMap<String, String>() {{
+			   put("cs.uid", "fwadmin");
+			   put("cs.pwd", "xceladmin");
+			   put("cs.dburl", "jdbc:jtds:sqlserver://localhost:1433;instanceName=SQLEXPRESS;DatabaseName=Fatwire;");
+			   put("cs.dbdriver", "net.sourceforge.jtds.jdbc.Driver");
+			   put("cs.dbuid", "Fatwire");
+			   put("cs.dbpwd", "Fatwire");
+			   put("cs.installDir", "C:\\fatwire");			   
+			}}
+		);
 	}
 
 	@AfterClass
@@ -54,14 +67,14 @@ public class AssetDataManagerTests {
 
 	@Test
 	public final void ShouldCreateAssetDataManagerHelper() {
-		AssetDataManager mgr = AssetDataManagerHelper.getManager();
+		AssetDataManager mgr = admMgr.getManager();
 		assertNotNull(mgr);
 	}
 
 	@Test
 	public final void DataManagerHelper_Should_HelpReadBlobData()
 			throws Exception {
-		AssetDataManager mgr = AssetDataManagerHelper.getManager();
+		AssetDataManager mgr = admMgr.getManager();
 		Query query = new SimpleQuery("CSElement", null,
 				ConditionFactory.createCondition("id", OpTypeEnum.EQUALS,
 						"1387007373693"), Collections.singletonList("url"));
@@ -81,7 +94,7 @@ public class AssetDataManagerTests {
 	@Test
 	public final void DataManagerHelper_Should_HelpWriteBlobData() throws Exception {
 		List<AssetData> sAssets = new ArrayList<AssetData>();
-		AssetDataManager mgr = AssetDataManagerHelper.getManager();
+		AssetDataManager mgr = admMgr.getManager();
 		
 		Iterable<AssetData> assets = mgr.read( Arrays.<AssetId>asList(
 				new AssetIdImpl( "CSElement", 1387007373693L))
@@ -116,7 +129,7 @@ public class AssetDataManagerTests {
 
 	private void testReadAssetAttribute(String assetType, String subType,
 			String attribute) {
-		AssetDataManager mgr = AssetDataManagerHelper.getManager();
+		AssetDataManager mgr = admMgr.getManager();
 		Query q = new SimpleQuery(assetType, subType, null,
 				Collections.singletonList(attribute));
 
@@ -131,8 +144,7 @@ public class AssetDataManagerTests {
 	}
 
 	private void testReadAssetDefinitions(String assetType, String subType) {
-		AssetTypeDefManager mgr = AssetDataManagerHelper
-				.getAssetTypeDefManager();
+		AssetTypeDefManager mgr = admMgr.getAssetTypeDefManager();
 		AssetTypeDef defMgr = null;
 		try {
 			defMgr = mgr.findByName(assetType, subType);
